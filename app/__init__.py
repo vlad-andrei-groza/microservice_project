@@ -1,6 +1,7 @@
 from flask import Flask
 from .db import db
-from .api import api_bp
+from .api import api_bp, math_operations_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -10,6 +11,7 @@ def create_app():
 
     with app.app_context():
         app.register_blueprint(api_bp, url_prefix='/api')
+        app.register_blueprint(math_operations_bp)
         db.create_all()
 
     return app
