@@ -10,11 +10,12 @@ consumer = KafkaConsumer(
     auto_offset_reset='earliest',
 )
 
+
 def consume_logs():
     try:
         for message in consumer:
             log = message.value
-            print(f"Consumed log: {log['event']} with payload: {log['payload']}")
+            print(f"Log: {log['event']} with payload: {log['payload']}")
     except KeyboardInterrupt:
         print("Stopping consumer...")
         consumer.close()
