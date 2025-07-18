@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from . import db
 from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest, FactorialRequest
 from .operations import pow_func, fibonacci, factorial
+from .services.logger import log_event
 
 api_bp = Blueprint('api', __name__)
 math_operations_bp = Blueprint('math', __name__, url_prefix='/api/math')
@@ -28,6 +29,13 @@ def pow_operation_route():
     base, exponent = parsed_data.base, parsed_data.exponent
     result = pow_func(base, exponent)
     store_request("pow", f"b={base}, e={exponent}", result)
+
+    # Log the event
+    log_event("pow_operation", {
+        "operation": "pow",
+        "input": f"b={base}, e={exponent}",
+        "result": result
+    })
 
     return jsonify(ResultResponse(result=result).model_dump())
 
@@ -66,6 +74,13 @@ def fibonacci_route():
     result = fibonacci(parsed_data.n)
     store_request("fibonacci", f"n={parsed_data.n}", result)
 
+    # Log the event
+    log_event("fibonacci_operation", {
+        "operation": "fibonacci",
+        "input": f"n={parsed_data.n}",
+        "result": result
+    })
+
     return jsonify(ResultResponse(result=result).model_dump())
 
 
@@ -102,6 +117,13 @@ def factorial_route():
         return jsonify(errors=errors), 400
     result = factorial(parsed_data.n)
     store_request("factorial", f"n={parsed_data.n}", result)
+
+    # Log the event
+    log_event("factorial_operation", {
+        "operation": "factorial",
+        "input": f"n={parsed_data.n}",
+        "result": result
+    })
 
     return jsonify(ResultResponse(result=result).model_dump())
 
