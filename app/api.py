@@ -2,8 +2,8 @@ import flask
 from flask import Blueprint, jsonify
 from pydantic import ValidationError
 from . import db
-from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest
-from .operations import pow_func, fibonacci
+from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest, FactorialRequest
+from .operations import pow_func, fibonacci, factorial
 
 api_bp = Blueprint('api', __name__)
 math_operations_bp = Blueprint('math', __name__, url_prefix='/api/math')
@@ -38,7 +38,9 @@ def get_all_pow_operation_results():
     Handle GET requests for power operation.
     :return: all power operation results as JSON
     """
-    requests = MathOperationRequest.query.filter_by(operation='pow').all()
+    requests = (MathOperationRequest
+                .query
+                .filter_by(operation='pow').all())
     results = [
         {
             "id": req.id,
@@ -73,7 +75,46 @@ def get_all_fibonacci_results():
     Handle GET requests for Fibonacci operation.
     :return: all Fibonacci operation results as JSON
     """
-    requests = MathOperationRequest.query.filter_by(operation='fibonacci').all()
+    requests = (MathOperationRequest
+                .query
+                .filter_by(operation='fibonacci').all())
+    results = [
+        {
+            "id": req.id,
+            "input": req.input,
+            "result": req.result,
+            "timestamp": req.timestamp.isoformat()
+        } for req in requests
+    ]
+
+    return jsonify(results=results)
+
+
+@math_operations_bp.route('/factorial', methods=['POST'])
+def factorial_route():
+    """
+    Handle POST requests for factorial operation.
+    :return: the result of the factorial operation as JSON
+    """
+    data = flask.request.get_json()
+    parsed_data, errors = parse_request(FactorialRequest, data)
+    if errors:
+        return jsonify(errors=errors), 400
+    result = factorial(parsed_data.n)
+    store_request("factorial", f"n={parsed_data.n}", result)
+
+    return jsonify(ResultResponse(result=result).model_dump())
+
+
+@math_operations_bp.route('/factorial', methods=['GET'])
+def get_all_factorial_results():
+    """
+    Handle GET requests for factorial operation.
+    :return: all factorial operation results as JSON
+    """
+    requests = (MathOperationRequest
+                .query
+                .filter_by(operation='factorial').all())
     results = [
         {
             "id": req.id,

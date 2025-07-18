@@ -14,3 +14,11 @@ def fibonacci(n):
         for _ in range(2, n + 1):
             a, b = b, a + b
         return b
+
+
+def factorial(n):
+    """Calculate the factorial of a number."""
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
