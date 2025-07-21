@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Math Operations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="snackbar"></div>
+    <div id="app">
+        <h2>Math Operations</h2>
+
+        <div class="operation">
+            <h2>Power</h2>
+            <input type="number" id="base" placeholder="Base">
+            <input type="number" id="exponent" placeholder="Exponent">
+            <button onclick="computePower()">Calculate</button>
+
+            <pre id="pow-result"></pre>
+        </div>
+
+        <div class="operation">
+            <h2>Fibonacci</h2>
+            <input type="number" id="fib_n" placeholder="n">
+            <button onclick="computeFibonacci()">Calculate</button>
+
+            <pre id="fib-result"></pre>
+        </div>
+
+        <div class="operation">
+            <h2>Factorial</h2>
+            <input type="number" id="fact_n" placeholder="n">
+            <button onclick="computeFactorial()">Calculate</button>
+
+            <pre id="fact-result"></pre>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
