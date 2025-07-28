@@ -2,6 +2,7 @@ import flask
 from flask import Blueprint, jsonify
 from pydantic import ValidationError
 from . import db
+from .cache import get_cache, set_cache
 from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest, FactorialRequest
 from .operations import pow_func, fibonacci, factorial
 from .services.logger import log_event
@@ -27,6 +28,12 @@ def pow_operation_route():
     if errors:
         return jsonify(errors=errors), 400
     base, exponent = parsed_data.base, parsed_data.exponent
+
+    cache_key = f"pow_{base}:{exponent}"
+    cached_result = get_cache(cache_key)
+    if cached_result is not None:
+        return jsonify(ResultResponse(result=cached_result).model_dump())
+
     result = pow_func(base, exponent)
     store_request("pow", f"b={base}, e={exponent}", result)
 
@@ -36,6 +43,8 @@ def pow_operation_route():
         "input": f"b={base}, e={exponent}",
         "result": result
     })
+
+    set_cache(cache_key, result)
 
     return jsonify(ResultResponse(result=result).model_dump())
 
@@ -71,6 +80,12 @@ def fibonacci_route():
     parsed_data, errors = parse_request(FibonacciRequest, data)
     if errors:
         return jsonify(errors=errors), 400
+
+    cache_key = f"fibonacci_{parsed_data.n}"
+    cached_result = get_cache(cache_key)
+    if cached_result is not None:
+        return jsonify(ResultResponse(result=cached_result).model_dump())
+
     result = fibonacci(parsed_data.n)
     store_request("fibonacci", f"n={parsed_data.n}", result)
 
@@ -80,6 +95,8 @@ def fibonacci_route():
         "input": f"n={parsed_data.n}",
         "result": result
     })
+
+    set_cache(cache_key, result)
 
     return jsonify(ResultResponse(result=result).model_dump())
 
@@ -115,6 +132,12 @@ def factorial_route():
     parsed_data, errors = parse_request(FactorialRequest, data)
     if errors:
         return jsonify(errors=errors), 400
+
+    cache_key = f"factorial_{parsed_data.n}"
+    cached_result = get_cache(cache_key)
+    if cached_result is not None:
+        return jsonify(ResultResponse(result=cached_result).model_dump())
+
     result = factorial(parsed_data.n)
     store_request("factorial", f"n={parsed_data.n}", result)
 
@@ -124,6 +147,8 @@ def factorial_route():
         "input": f"n={parsed_data.n}",
         "result": result
     })
+
+    set_cache(cache_key, result)
 
     return jsonify(ResultResponse(result=result).model_dump())
 
