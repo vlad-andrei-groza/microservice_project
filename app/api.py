@@ -3,7 +3,7 @@ from functools import wraps
 
 import flask
 import jwt
-from flask import Blueprint, jsonify, request, abort, g
+from flask import Blueprint, jsonify, request, g
 from pydantic import ValidationError
 from . import db
 from .cache import get_cache, set_cache
