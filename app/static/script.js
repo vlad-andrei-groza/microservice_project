@@ -1,11 +1,19 @@
 const API_BASE = '/api/math';
 
+function getAuthHeader() {
+    const token = localStorage.getItem('jwt_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 function computePower() {
     const base = document.getElementById('base').value;
     const exponent = document.getElementById('exponent').value;
     fetch(`${API_BASE}/pow`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        },
         body: JSON.stringify({base: parseInt(base), exponent: parseInt(exponent)})
     })
         .then(handleResponse)
@@ -19,7 +27,10 @@ function computeFibonacci() {
     const n = document.getElementById('fib_n').value;
     fetch(`${API_BASE}/fibonacci`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        },
         body: JSON.stringify({n: parseInt(n)})
     })
         .then(handleResponse)
@@ -33,7 +44,10 @@ function computeFactorial() {
     const n = document.getElementById('fact_n').value;
     fetch(`${API_BASE}/factorial`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        },
         body: JSON.stringify({n: parseInt(n)})
     })
         .then(handleResponse)

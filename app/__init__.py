@@ -1,4 +1,6 @@
 from flask import Flask
+
+from .auth import auth_bp
 from .db import db
 from .api import api_bp, math_operations_bp
 from .web import web_bp
@@ -14,6 +16,7 @@ def create_app():
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(math_operations_bp)
         app.register_blueprint(web_bp)
+        app.register_blueprint(auth_bp)
         db.create_all()
 
     return app

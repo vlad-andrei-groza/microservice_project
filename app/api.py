@@ -1,14 +1,50 @@
+import os
+from functools import wraps
+
 import flask
-from flask import Blueprint, jsonify
+import jwt
+from flask import Blueprint, jsonify, request, g
 from pydantic import ValidationError
 from . import db
 from .cache import get_cache, set_cache
-from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest, FactorialRequest
+from .models import MathOperationRequest, PowRequest, ResultResponse, FibonacciRequest, FactorialRequest, User
 from .operations import pow_func, fibonacci, factorial
 from .services.logger import log_event
 
 api_bp = Blueprint('api', __name__)
 math_operations_bp = Blueprint('math', __name__, url_prefix='/api/math')
+
+
+def auth_required(role=None):
+    """
+    Decorator to require authentication for API routes.
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            auth_header = request.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                return {"error": "Missing or invalid token"}, 401
+
+            token = auth_header.split(" ")[1]
+            try:
+                payload = jwt.decode(token, os.getenv("JWT_SECRET_KEY"), algorithms=["HS256"])
+                user = User.query.get(payload["user_id"])
+                if not user:
+                    return {"error": "User not found"}, 403
+                if role and user.role != role:
+                    return {"error": "Unauthorized role"}, 403
+                g.current_user = user
+            except jwt.ExpiredSignatureError:
+                return {"error": "Token expired"}, 401
+            except jwt.InvalidTokenError:
+                return {"error": "Invalid token"}, 403
+
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 # Define a simple route for the API
@@ -18,6 +54,7 @@ def index():
 
 
 @math_operations_bp.route('/pow', methods=['POST'])
+@auth_required(role='user')
 def pow_operation_route():
     """
     Handle POST requests for power operation.
@@ -39,6 +76,7 @@ def pow_operation_route():
 
     # Log the event
     log_event("pow_operation", {
+        "user": g.current_user.username,
         "operation": "pow",
         "input": f"b={base}, e={exponent}",
         "result": result
@@ -50,6 +88,7 @@ def pow_operation_route():
 
 
 @math_operations_bp.route('/pow', methods=['GET'])
+@auth_required(role='admin')
 def get_all_pow_operation_results():
     """
     Handle GET requests for power operation.
@@ -71,6 +110,7 @@ def get_all_pow_operation_results():
 
 
 @math_operations_bp.route('/fibonacci', methods=['POST'])
+@auth_required(role='user')
 def fibonacci_route():
     """
     Handle POST requests for Fibonacci operation.
@@ -91,6 +131,7 @@ def fibonacci_route():
 
     # Log the event
     log_event("fibonacci_operation", {
+        "user": g.current_user.username,
         "operation": "fibonacci",
         "input": f"n={parsed_data.n}",
         "result": result
@@ -102,6 +143,7 @@ def fibonacci_route():
 
 
 @math_operations_bp.route('/fibonacci', methods=['GET'])
+@auth_required(role='admin')
 def get_all_fibonacci_results():
     """
     Handle GET requests for Fibonacci operation.
@@ -123,6 +165,7 @@ def get_all_fibonacci_results():
 
 
 @math_operations_bp.route('/factorial', methods=['POST'])
+@auth_required(role='user')
 def factorial_route():
     """
     Handle POST requests for factorial operation.
@@ -143,6 +186,7 @@ def factorial_route():
 
     # Log the event
     log_event("factorial_operation", {
+        "user": g.current_user.username,
         "operation": "factorial",
         "input": f"n={parsed_data.n}",
         "result": result
@@ -154,6 +198,7 @@ def factorial_route():
 
 
 @math_operations_bp.route('/factorial', methods=['GET'])
+@auth_required(role='admin')
 def get_all_factorial_results():
     """
     Handle GET requests for factorial operation.
