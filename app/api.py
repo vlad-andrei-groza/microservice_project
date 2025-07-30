@@ -69,6 +69,13 @@ def pow_operation_route():
     cache_key = f"pow_{base}:{exponent}"
     cached_result = get_cache(cache_key)
     if cached_result is not None:
+        log_event("cached_pow_operation", {
+            "user": g.current_user.username,
+            "operation": "pow",
+            "input": f"b={base}, e={exponent}",
+            "result": cached_result
+        })
+
         return jsonify(ResultResponse(result=cached_result).model_dump())
 
     result = pow_func(base, exponent)
@@ -124,6 +131,13 @@ def fibonacci_route():
     cache_key = f"fibonacci_{parsed_data.n}"
     cached_result = get_cache(cache_key)
     if cached_result is not None:
+        log_event("cached_fibonacci_operation", {
+            "user": g.current_user.username,
+            "operation": "fibonacci",
+            "input": f"n={parsed_data.n}",
+            "result": cached_result
+        })
+
         return jsonify(ResultResponse(result=cached_result).model_dump())
 
     result = fibonacci(parsed_data.n)
@@ -179,6 +193,13 @@ def factorial_route():
     cache_key = f"factorial_{parsed_data.n}"
     cached_result = get_cache(cache_key)
     if cached_result is not None:
+        log_event("cached_factorial_operation", {
+            "user": g.current_user.username,
+            "operation": "factorial",
+            "input": f"n={parsed_data.n}",
+            "result": cached_result
+        })
+
         return jsonify(ResultResponse(result=cached_result).model_dump())
 
     result = factorial(parsed_data.n)
