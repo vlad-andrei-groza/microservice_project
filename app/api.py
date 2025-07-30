@@ -88,6 +88,7 @@ def pow_operation_route():
 
 
 @math_operations_bp.route('/pow', methods=['GET'])
+@auth_required(role='admin')
 def get_all_pow_operation_results():
     """
     Handle GET requests for power operation.
@@ -142,6 +143,7 @@ def fibonacci_route():
 
 
 @math_operations_bp.route('/fibonacci', methods=['GET'])
+@auth_required(role='admin')
 def get_all_fibonacci_results():
     """
     Handle GET requests for Fibonacci operation.
@@ -196,6 +198,7 @@ def factorial_route():
 
 
 @math_operations_bp.route('/factorial', methods=['GET'])
+@auth_required(role='admin')
 def get_all_factorial_results():
     """
     Handle GET requests for factorial operation.
